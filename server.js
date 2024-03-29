@@ -1,10 +1,14 @@
 const http = require('http');
 const app = require('./app');
 const book = require('./book');
+require('dotenv').config();
+
+const cors = require("cors");
+const  expressSession = require('express-session');
 
 var mysql=  require ('mysql');
 
-const normalizePort = val => {
+function normalizePort(val) {
   const port = parseInt(val, 10);
 
   if (isNaN(port)) {
@@ -14,32 +18,30 @@ const normalizePort = val => {
     return port;
   }
   return false;
-};
+}
 /* Choix du port de connexion au serveur*/ 
 const port = normalizePort(process.env.PORT || '3000');
-app.set('port', port);
 
-
-const server = http.createServer(app);
-
-server.listen(port);
 
 /* Paramètres de connexion à la base de données.*/
-var connection = mysql.createConnection({
-    host     : '127.0.0.1',
-    user     : 'root',
-    password : 'd@tabase',
-    database: 'Books',
-  });
+const databaseUrl = process.env.DATABASE_URL;
 
-  // Établit la connexion à la base de données
+// Créer une connexion à la base de données MySQL
+const connection = mysql.createConnection(databaseUrl);
+
+app.listen(port, () => {
+  console.log(`Le serveur écoute sur le port ${port}`);
+});
+
+// Connexion à la base de données
 connection.connect((err) => {
     if (err) {
-      console.error('Erreur de connexion à la base de données :', err);
-      return;
+        console.error('Erreur de connexion à la base de données :', err);
+        return;
     }
-    console.log('Connexion à la base de données réussie !');
-  });
+    console.log('Connecté à la base de données MySQL !');
+});
+
   
   // Gestion des erreurs de connexion
   connection.on('error', (err) => {
